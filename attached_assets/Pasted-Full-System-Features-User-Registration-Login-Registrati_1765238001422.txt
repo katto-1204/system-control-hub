@@ -1,0 +1,829 @@
+Full System Features
+User Registration & Login:
+
+
+Registration: New users (students, faculty) can create accounts using their email addresses, student IDs, and roles (Student or Faculty).
+
+
+Login: Secure login with username/email and password. Role-based access control (students can only request, admins can approve or reject).
+
+
+Password Reset: Users can reset passwords via email.
+
+
+Dashboard:
+
+
+Displays available facilities, equipment, and events.
+
+
+Users can view their upcoming bookings.
+
+
+Admins can view a summary of all upcoming events and facilities.
+
+
+Facility Availability Checker:
+
+
+Real-time facility and equipment availability checker.
+
+
+Users can filter based on date, time, and type of facility.
+
+
+Event Request Submission:
+
+
+Users can submit event requests with required details like event name, purpose, date, time, requested facility, and equipment needed.
+
+
+Users can upload supporting documents (e.g., event plans).
+
+
+Admins can view and process these requests.
+
+
+Notification System:
+
+
+Users receive notifications when their event request is approved or rejected.
+
+
+Email and system notifications for event status changes (pending, approved, rejected).
+
+
+Admin Approval Panel:
+
+
+Admins can view all pending, approved, and rejected event requests.
+
+
+Admins can approve or reject requests.
+
+
+Admins can monitor event progress, assign staff for event support, and access a full event history.
+
+
+Real-Time Calendar:
+
+
+A shared calendar showing booked and available facilities.
+
+
+Admins and users can see facility schedules in real-time.
+
+
+Time blocks for each facility and equipment are color-coded (available, booked, pending).
+
+
+Reporting & Analytics:
+
+
+Admins can generate reports on facility usage, equipment demand, and event frequencies.
+
+
+Reports can be exported as CSV or PDF.
+
+
+User Profile Management:
+
+
+Users can update personal details and view their event booking history.
+
+
+Admins have access to modify any user details or reset passwords.
+
+
+Admin Management:
+
+
+Manage user roles (assign, edit, remove).
+
+
+View user activity and track event requests over time.
+
+
+
+Screen List & Functionalities
+1. Login Screen
+Functionalities:
+
+
+Input fields: Email/Username, Password.
+
+
+Forgot password link.
+
+
+Login button.
+
+
+2. User Dashboard
+Functionalities:
+
+
+View all facilities, equipment, and their availability.
+
+
+View submitted requests with statuses (approved, pending, rejected).
+
+
+Submit new event booking requests.
+
+
+3. Facility Availability Screen
+Functionalities:
+
+
+Calendar view showing available and booked times.
+
+
+Filter by event type, equipment, or date.
+
+
+Facility search bar.
+
+
+4. Event Request Form
+Functionalities:
+
+
+Input fields: Event name, date, time, purpose, requested facility, required equipment.
+
+
+Upload documents (optional).
+
+
+Submit request button.
+
+
+Confirmation screen when the request is submitted successfully.
+
+
+5. Admin Dashboard
+Functionalities:
+
+
+View all event requests (pending, approved, rejected).
+
+
+Approve, reject, or request more information.
+
+
+View and manage user requests and events in real-time.
+
+
+View usage history and generate reports.
+
+
+6. Admin Approval Screen
+Functionalities:
+
+
+See event details and request status.
+
+
+Approve or reject requests.
+
+
+View event history and logs.
+
+
+7. Notification Center
+Functionalities:
+
+
+Real-time alerts for events (request approval, rejection, etc.).
+
+
+View previous notifications and mark as read.
+
+
+8. Profile Management Screen
+Functionalities:
+
+
+Update email, password, and other personal information.
+
+
+View event booking history.
+
+
+
+UI Layout Descriptions
+1. Color Scheme & Branding:
+Background: White (clean, minimalistic).
+
+
+Accent Colors: Red (for buttons, headers, and highlights).
+
+
+Text Color: Black for body text, dark gray for headings.
+
+
+Fonts: Clean and modern (e.g., Roboto, Open Sans).
+
+
+Logo: Simple, incorporates the school name and theme (optional).
+
+
+2. Layout Structure:
+Header: Includes school logo, user profile icon, and navigation (Dashboard, Requests, Profile, Logout).
+
+
+Sidebar (for Admins): Quick links to manage users, view requests, generate reports, and manage system settings.
+
+
+Content Area: Displays key information (e.g., event statuses, request forms, available facilities).
+
+
+Footer: Simple footer with copyright and contact info.
+
+
+
+Tech Stack
+Frontend:
+
+
+Next.js: Used for server-side rendering, static page generation, and fast navigation.
+
+
+React: Component-based architecture for building reusable UI components.
+
+
+Tailwind CSS: For responsive and customizable styling.
+
+
+Backend:
+
+
+Node.js + Express: Backend for API development and server-side logic.
+
+
+MySQL Database: Stores all data related to events, users, facilities, and bookings.
+
+
+Database:
+
+
+MySQL: Relational database to store data about users, events, bookings, and notifications.
+
+
+Authentication:
+
+
+JWT (JSON Web Tokens): Used for secure user authentication.
+
+
+Passport.js: For handling user login and registration.
+
+
+
+SQL Schema with Transactions, Functions, and Stored Procedures
+Database Tables:
+Users Table:
+
+ CREATE TABLE users (
+  user_id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  role ENUM('student', 'faculty', 'admin') NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+Facilities Table:
+
+ CREATE TABLE facilities (
+  facility_id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  capacity INT,
+  status ENUM('available', 'booked') DEFAULT 'available',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+Bookings Table:
+
+ CREATE TABLE bookings (
+  booking_id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  facility_id INT,
+  event_name VARCHAR(255),
+  event_date DATE,
+  start_time TIME,
+  end_time TIME,
+  equipment_needed TEXT,
+  status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(user_id),
+  FOREIGN KEY (facility_id) REFERENCES facilities(facility_id)
+);
+
+
+Notifications Table:
+
+ CREATE TABLE notifications (
+  notification_id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  message TEXT,
+  status ENUM('unread', 'read') DEFAULT 'unread',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+
+Stored Procedures & Functions:
+Approve Event Request:
+
+ DELIMITER //
+CREATE PROCEDURE approve_event(booking_id INT)
+BEGIN
+  UPDATE bookings
+  SET status = 'approved', updated_at = CURRENT_TIMESTAMP
+  WHERE booking_id = booking_id;
+
+  UPDATE facilities
+  SET status = 'booked'
+  WHERE facility_id = (SELECT facility_id FROM bookings WHERE booking_id = booking_id);
+END //
+DELIMITER ;
+
+
+Reject Event Request:
+
+ DELIMITER //
+CREATE PROCEDURE reject_event(booking_id INT)
+BEGIN
+  UPDATE bookings
+  SET status = 'rejected', updated_at = CURRENT_TIMESTAMP
+  WHERE booking_id = booking_id;
+END //
+DELIMITER ;
+
+
+Get Available Facilities:
+
+ CREATE FUNCTION get_available_facilities(event_date DATE, start_time TIME, end_time TIME)
+RETURNS TABLE
+BEGIN
+  RETURN
+  (SELECT * FROM facilities WHERE status = 'available' 
+   AND NOT EXISTS (
+      SELECT 1 FROM bookings 
+      WHERE facility_id = facilities.facility_id
+      AND event_date = event_date
+      AND ((start_time BETWEEN start_time AND end_time) OR (end_time BETWEEN start_time AND end_time))
+   ));
+END;
+
+
+1. Branding Identity
+Color Palette
+Use
+Color
+HEX
+Primary
+Institutional Red
+#C62828
+Secondary
+Deep Gray
+#424242
+Background
+White
+#FFFFFF
+Light Gray (borders/lines)
+#E0E0E0
+
+
+Success
+#2E7D32
+
+
+Warning (Pending)
+#F9A825
+
+
+Error
+#C62828
+
+
+
+Typography
+Font Family: Roboto or Open Sans
+
+
+Headings: Semi-bold
+
+
+Body: Regular
+
+
+Buttons: Bold
+
+
+Logo (Concept Description)
+A minimalistic emblem that includes:
+A red shield shape
+
+
+White icon in the center showing a building outline or calendar
+
+
+System name beside it: "Facility & Event Management System" using Roboto Bold in dark gray
+
+
+(Matches school/institutional design standards.)
+
+🔥 2. UI Design (Screen-by-Screen)
+All designs prioritize clarity, responsive layout, and easy task completion.
+
+1. Login Screen
+Design Description
+Centered Card with rounded corners (shadow-sm)
+
+
+Institution logo on top
+
+
+Two input fields
+
+
+Red primary button
+
+
+Link-style "Forgot Password?"
+
+
+Layout
+-------------------------------------------
+|   [Logo]                                  |
+|   School Name                              |
+|                                            |
+|  [ Email Input ]                           |
+|  [ Password Input ]                        |
+|  [ Login Button - Red ]                    |
+|                                            |
+|  Forgot Password?                          |
+---------------------------------------------
+
+Functionality Ensured
+✔ JWT login
+ ✔ Role-based redirect
+ ✔ Error states visible under input fields
+
+2. User Dashboard
+Design Description
+Clean, card-based layout
+
+
+Quick stats cards
+
+
+List of available facilities (scrollable grid)
+
+
+Tile for “Submit Event Request”
+
+
+Components
+Top Nav Bar: Logo, Notifications, Profile
+
+
+Facility Grid Cards: show name, availability tag
+
+
+Bookings Summary Cards:
+
+
+Pending
+
+
+Approved
+
+
+Rejected
+
+
+Layout
+Header: Logo | Dashboard | Requests | Profile | Logout
+
+[ Quick Stats Row ]
+| Upcoming Bookings | Pending Requests | Notifications |
+
+[ Facilities Available ]
+| Facility Card | Facility Card | Facility Card | ...
+
+Works With
+✔ Real-time availability fetch
+ ✔ Quick link to request form
+ ✔ User event history
+
+3. Facility Availability Screen
+Design Description
+Calendar in center (Weekly / Monthly view)
+
+
+Color-coded blocks
+
+
+Side filters panel
+
+
+Color Codes
+Green: Available
+
+
+Red: Booked
+
+
+Yellow: Pending
+
+
+Layout
+Sidebar Filters:
+- Date Picker
+- Facility Type
+- Equipment
+- Search Bar
+
+Main Area:
+[ Calendar with colored blocks ]
+
+Works With
+✔ Real-time calendar system
+ ✔ Time-block conflict validation
+ ✔ Filtering
+
+4. Event Request Form
+Design Description
+Form arranged in two columns
+
+
+Drag-and-drop file uploader
+
+
+Live validation
+
+
+Summary box on right
+
+
+Layout
+Left Column:
+[ Event Name ]
+[ Purpose ]
+[ Date ]
+[ Time Start | Time End ]
+[ Facility Selector ]
+[ Equipment Multi-Select ]
+[ Upload Documents ]
+
+Right Column:
+[ Summary Preview ] updates automatically
+
+Bottom:
+[ Submit Request Button - Red ]
+
+Works With
+✔ Dual validation (frontend + backend)
+ ✔ File uploads
+ ✔ Auto-summary for user clarity
+
+5. Admin Dashboard
+Design Description
+Wider layout with sidebar
+
+
+Real-time counters
+
+
+Kanban-style request overview (Pending / Approved / Rejected)
+
+
+Sidebar
+Dashboard
+
+
+Requests
+
+
+Facilities
+
+
+Equipment
+
+
+Reports
+
+
+Users
+
+
+Settings
+
+
+Main Content
+[ Stats Row ]
+Pending | Approved Today | Total Facilities | Issues
+
+[ Requests Kanban ]
+| Pending | Approved | Rejected |
+Drag/Drop Optional
+
+Works With
+✔ Real-time requests
+ ✔ Admin actions
+ ✔ Quick access to reporting
+
+6. Admin Approval Screen
+Design Description
+Full event info left
+
+
+Approve/Reject panel right
+
+
+Timeline of logs
+
+
+Layout
+Left:
+[ Event Details ]
+- Name
+- Purpose
+- User
+- Facility
+- Equipment
+- Documents (Download)
+
+Right:
+[ Approve Button ]
+[ Reject Button ]
+[ Message Input ]
+
+Bottom:
+[ Event History Timeline ]
+
+Works With
+✔ Stored procedure triggers
+ ✔ Notifications
+ ✔ Facility auto-locking
+
+7. Notification Center
+Design Description
+Bell icon opens sliding panel
+
+
+List of unread + read
+
+
+Mark as read
+
+
+Layout
+Sliding Panel:
+Notifications
+-----------------------
+[Unread] Your booking approved
+[Unread] Facility updated
+[Read] Request rejected
+
+Works With
+✔ Real-time push/Pusher
+ ✔ Email + System notifications
+
+8. Profile Management Screen
+Design Description
+Two-column layout
+
+
+Editable fields
+
+
+Booking history underneath
+
+
+Layout
+Left Column:
+Profile Picture (optional)
+Name
+Email
+Password Update
+
+Right Column:
+Event History Table
+
+Works With
+✔ Password hashing
+ ✔ Self-service updates
+
+📌 Design Interaction Rules (UX)
+To ensure everything functions smoothly:
+1. Form Validation Rules
+All forms show inline validation
+
+
+Prevent submission until valid
+
+
+Clear error messages
+
+
+2. Real-Time Sync
+Availability and calendar must refresh automatically on date change
+
+
+Pending changes should not reflect as booked unless approved
+
+
+3. Notification Rules
+Every approval or rejection must create a DB notification
+
+
+System notifications shown instantly
+
+
+4. Admin Controls
+Approve triggers:
+
+
+booking status → “approved”
+
+
+facility status → “booked”
+
+
+Reject triggers:
+
+
+booking status → “rejected”
+
+
+facility remains unchanged
+
+
+
+🎨 Component Library (Reusable UI Components)
+Buttons
+.btn-primary (red)
+
+
+.btn-secondary (gray)
+
+
+.btn-outline (border only)
+
+
+Cards
+Facility Card
+
+
+Event Card
+
+
+Stat Summary Card
+
+
+Navigation
+Top Nav
+
+
+Admin Sidebar
+
+
+Forms
+Input
+
+
+Select
+
+
+Modal
+
+
+File Upload
+
+
+Multi-select dropdown
+
+
+
+🚀 Final Summary — Everything Works Together
+This UI + branding set ensures:
+✔ A smooth, intuitive user experience
+ ✔ A clean brand identity
+ ✔ Clear role-based separation
+ ✔ Easy navigation
+ ✔ Real-time availability updates
+ ✔ Seamless admin approval workflow
+ ✔ Strong visual hierarchy
+ ✔ Full system functionality
+
