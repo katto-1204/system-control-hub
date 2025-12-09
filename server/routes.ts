@@ -88,6 +88,8 @@ export async function registerRoutes(
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
+      console.log("User fetched from DB:", JSON.stringify(user, null, 2));
+
       const validPassword = await bcrypt.compare(password, user.password);
       if (!validPassword) {
         return res.status(401).json({ message: "Invalid email or password" });

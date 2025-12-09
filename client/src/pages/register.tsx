@@ -52,7 +52,7 @@ export default function RegisterPage() {
     mutationFn: async (data: RegisterFormData) => {
       const { confirmPassword, ...registerData } = data;
       const response = await apiRequest("POST", "/api/auth/register", registerData);
-      return response;
+      return response.json();
     },
     onSuccess: (data: { user: any; token: string }) => {
       login(data.user, data.token);
