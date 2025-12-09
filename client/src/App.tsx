@@ -60,6 +60,12 @@ function Router() {
         </UserLayout>
       </Route>
       
+      <Route path="/request">
+        <UserLayout>
+          <EventRequest />
+        </UserLayout>
+      </Route>
+      
       <Route path="/my-bookings">
         <UserLayout>
           <MyBookings />

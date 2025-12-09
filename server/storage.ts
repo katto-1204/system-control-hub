@@ -32,7 +32,9 @@ export interface IStorage {
   getAllBookings(): Promise<BookingWithRelations[]>;
   getUserBookings(userId: number): Promise<BookingWithRelations[]>;
   createBooking(booking: InsertBooking): Promise<Booking>;
+  updateBooking(id: number, data: Partial<InsertBooking>): Promise<Booking | undefined>;
   updateBookingStatus(id: number, status: "pending" | "approved" | "rejected", adminId: number, notes?: string): Promise<Booking | undefined>;
+  deleteBooking(id: number): Promise<boolean>;
   getBookingStats(): Promise<{ pending: number; approved: number; rejected: number; total: number }>;
 
   // Notifications
@@ -167,6 +169,14 @@ export class DatabaseStorage implements IStorage {
     return newBooking;
   }
 
+  async updateBooking(id: number, data: Partial<InsertBooking>): Promise<Booking | undefined> {
+    const [updated] = await db.update(bookings)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(bookings.id, id))
+      .returning();
+    return updated;
+  }
+
   async updateBookingStatus(
     id: number, 
     status: "pending" | "approved" | "rejected", 
@@ -184,6 +194,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(bookings.id, id))
       .returning();
     return updated;
+  }
+
+  async deleteBooking(id: number): Promise<boolean> {
+    await db.delete(bookings).where(eq(bookings.id, id));
+    return true;
   }
 
   async getBookingStats(): Promise<{ pending: number; approved: number; rejected: number; total: number }> {

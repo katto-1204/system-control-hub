@@ -62,6 +62,7 @@ export default function Profile() {
       if (user) {
         login({ ...user, ...data.user }, localStorage.getItem("token") || "");
       }
+      queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
       toast({
         title: "Profile updated",
         description: "Your profile has been updated successfully.",
@@ -88,10 +89,10 @@ export default function Profile() {
         description: "Your password has been changed successfully.",
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Password change failed",
-        description: "Failed to change password. Please check your current password.",
+        description: error.message || "Failed to change password. Please check your current password.",
         variant: "destructive",
       });
     },

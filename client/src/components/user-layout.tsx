@@ -46,8 +46,10 @@ export function UserLayout({ children, requireAdmin = false }: UserLayoutProps) 
           <header className="flex items-center gap-2 border-b h-12 px-4 shrink-0">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
           </header>
-          <main className="flex-1 overflow-auto">
-            {children}
+          <main className="flex-1 overflow-auto p-6 md:p-8">
+            <div className="max-w-7xl mx-auto">
+              {children}
+            </div>
           </main>
         </SidebarInset>
       </div>

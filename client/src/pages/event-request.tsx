@@ -64,7 +64,8 @@ export default function EventRequestPage() {
         userId: user?.id,
         eventDate: format(data.eventDate, "yyyy-MM-dd"),
       };
-      return apiRequest("POST", "/api/bookings", payload);
+      const response = await apiRequest("POST", "/api/bookings", payload);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/bookings/my"] });
@@ -128,7 +129,7 @@ export default function EventRequestPage() {
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem value="" disabled>No facilities available</SelectItem>
+                        <SelectItem value="no-facilities" disabled>No facilities available</SelectItem>
                       )}
                     </SelectContent>
                   </Select>

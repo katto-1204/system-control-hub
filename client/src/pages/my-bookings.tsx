@@ -1,11 +1,23 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { BookingWithRelations } from "@shared/schema";
 import {
   Calendar,
@@ -16,6 +28,8 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -36,7 +50,15 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function BookingCard({ booking }: { booking: BookingWithRelations }) {
+function BookingCard({ 
+  booking, 
+  onDelete 
+}: { 
+  booking: BookingWithRelations;
+  onDelete: (id: number) => void;
+}) {
+  const canEdit = booking.status === "pending";
+
   return (
     <Card className="hover-elevate overflow-visible" data-testid={`my-booking-card-${booking.id}`}>
       <CardContent className="p-6">
@@ -49,7 +71,9 @@ function BookingCard({ booking }: { booking: BookingWithRelations }) {
                 <span>{booking.facility?.name || "N/A"}</span>
               </div>
             </div>
-            <StatusBadge status={booking.status} />
+            <div className="flex items-center gap-2">
+              <StatusBadge status={booking.status} />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
@@ -83,8 +107,29 @@ function BookingCard({ booking }: { booking: BookingWithRelations }) {
             </div>
           )}
 
-          <div className="text-xs text-muted-foreground pt-2 border-t">
-            Submitted on {booking.createdAt ? format(new Date(booking.createdAt), "MMMM d, yyyy 'at' h:mm a") : "N/A"}
+          <div className="flex items-center justify-between pt-2 border-t">
+            <div className="text-xs text-muted-foreground">
+              Submitted on {booking.createdAt ? format(new Date(booking.createdAt), "MMMM d, yyyy 'at' h:mm a") : "N/A"}
+            </div>
+            {canEdit && (
+              <div className="flex gap-2">
+                <Link href={`/request?edit=${booking.id}`}>
+                  <Button size="sm" variant="outline" data-testid={`button-edit-${booking.id}`}>
+                    <Pencil className="w-3 h-3 mr-1" />
+                    Edit
+                  </Button>
+                </Link>
+                <Button 
+                  size="sm" 
+                  variant="destructive" 
+                  onClick={() => onDelete(booking.id)}
+                  data-testid={`button-delete-${booking.id}`}
+                >
+                  <Trash2 className="w-3 h-3 mr-1" />
+                  Delete
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
@@ -93,10 +138,34 @@ function BookingCard({ booking }: { booking: BookingWithRelations }) {
 }
 
 export default function MyBookingsPage() {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("all");
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const { data: bookings, isLoading } = useQuery<BookingWithRelations[]>({
     queryKey: ["/api/bookings/my"],
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/bookings/${id}`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/bookings/my"] });
+      toast({
+        title: "Booking deleted",
+        description: "Your booking request has been deleted.",
+      });
+      setDeleteId(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   const filteredBookings = bookings?.filter(booking => {
@@ -151,7 +220,11 @@ export default function MyBookingsPage() {
           ) : filteredBookings.length > 0 ? (
             <div className="space-y-4">
               {filteredBookings.map(booking => (
-                <BookingCard key={booking.id} booking={booking} />
+                <BookingCard 
+                  key={booking.id} 
+                  booking={booking} 
+                  onDelete={setDeleteId}
+                />
               ))}
             </div>
           ) : (
@@ -178,6 +251,26 @@ export default function MyBookingsPage() {
           )}
         </TabsContent>
       </Tabs>
+
+      <AlertDialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Booking Request</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this booking request? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteId && deleteMutation.mutate(deleteId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

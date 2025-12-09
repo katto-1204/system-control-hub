@@ -120,7 +120,7 @@ export default function AdminDashboard() {
   const recentBookings = bookings?.slice(0, 5) || [];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 w-full">
       <div>
         <h1 className="text-2xl font-semibold text-foreground">Admin Dashboard</h1>
         <p className="text-muted-foreground mt-1">

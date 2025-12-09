@@ -56,10 +56,10 @@ function FacilityDialog({
 
   const mutation = useMutation({
     mutationFn: async (data: FacilityFormData) => {
-      if (isEdit) {
-        return apiRequest("PATCH", `/api/admin/facilities/${facility.id}`, data);
-      }
-      return apiRequest("POST", "/api/admin/facilities", data);
+      const response = isEdit
+        ? await apiRequest("PATCH", `/api/admin/facilities/${facility.id}`, data)
+        : await apiRequest("POST", "/api/admin/facilities", data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/facilities"] });
@@ -167,7 +167,8 @@ export default function AdminFacilitiesPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest("DELETE", `/api/admin/facilities/${id}`, {});
+      const response = await apiRequest("DELETE", `/api/admin/facilities/${id}`, {});
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/facilities"] });

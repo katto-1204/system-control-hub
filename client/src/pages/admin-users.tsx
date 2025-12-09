@@ -36,7 +36,8 @@ export default function AdminUsersPage() {
 
   const updateRoleMutation = useMutation({
     mutationFn: async ({ id, role }: { id: number; role: string }) => {
-      return apiRequest("PATCH", `/api/admin/users/${id}/role`, { role });
+      const response = await apiRequest("PATCH", `/api/admin/users/${id}/role`, { role });
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });

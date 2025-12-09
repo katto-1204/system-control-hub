@@ -184,7 +184,8 @@ export default function AdminBookingsPage() {
 
   const approveMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest("PATCH", `/api/admin/bookings/${id}/approve`, {});
+      const response = await apiRequest("PATCH", `/api/admin/bookings/${id}/approve`, {});
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/bookings"] });
@@ -204,7 +205,8 @@ export default function AdminBookingsPage() {
 
   const rejectMutation = useMutation({
     mutationFn: async ({ id, notes }: { id: number; notes: string }) => {
-      return apiRequest("PATCH", `/api/admin/bookings/${id}/reject`, { adminNotes: notes });
+      const response = await apiRequest("PATCH", `/api/admin/bookings/${id}/reject`, { adminNotes: notes });
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/bookings"] });

@@ -220,7 +220,72 @@ export async function registerRoutes(
       res.json(stats);
     } catch (error) {
       console.error("Get booking stats error:", error);
-      res.status(500).json({ message: "Failed to get booking stats" });
+      res.status(500).json({ message: "Failed to get stats" });
+    }
+  });
+
+  // Student booking management routes (update/delete own bookings if pending)
+  app.patch("/api/bookings/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const bookingId = parseInt(req.params.id);
+      const booking = await storage.getBooking(bookingId);
+
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+
+      // Only allow users to edit their own bookings
+      if (booking.userId !== req.user!.id) {
+        return res.status(403).json({ message: "You can only edit your own bookings" });
+      }
+
+      // Only allow editing if status is pending
+      if (booking.status !== "pending") {
+        return res.status(400).json({ message: "Only pending bookings can be edited" });
+      }
+
+      const parsed = insertBookingSchema.partial().safeParse({
+        ...req.body,
+        userId: req.user!.id,
+      });
+
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Validation failed", errors: parsed.error.errors });
+      }
+
+      // Update the booking using storage layer
+      const updated = await storage.updateBooking(bookingId, parsed.data);
+      res.json(updated);
+    } catch (error) {
+      console.error("Update booking error:", error);
+      res.status(500).json({ message: "Failed to update booking" });
+    }
+  });
+
+  app.delete("/api/bookings/:id", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const bookingId = parseInt(req.params.id);
+      const booking = await storage.getBooking(bookingId);
+
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+
+      // Only allow users to delete their own bookings
+      if (booking.userId !== req.user!.id && req.user!.role !== "admin") {
+        return res.status(403).json({ message: "You can only delete your own bookings" });
+      }
+
+      // Only allow deletion if status is pending (or if admin)
+      if (booking.status !== "pending" && req.user!.role !== "admin") {
+        return res.status(400).json({ message: "Only pending bookings can be deleted" });
+      }
+
+      await storage.deleteBooking(bookingId);
+      res.json({ message: "Booking deleted successfully" });
+    } catch (error) {
+      console.error("Delete booking error:", error);
+      res.status(500).json({ message: "Failed to delete booking" });
     }
   });
 
